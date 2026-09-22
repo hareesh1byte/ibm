@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Announcements — Apex College Portal{% endblock %}
+{% block content %}
+<div class="section-header">
+  <span class="section-tag">Notices</span>
+  <h1 class="section-title">Announcements</h1>
+</div>
+
+<div class="ann-tabs" style="display:flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+  <a href="{{ url_for('announcements', category='all') }}" class="filter-btn {{ 'active' if active_category == 'all' or not active_category else '' }} btn btn-sm {{ 'btn-primary' if (active_category == 'all' or not active_category) else 'btn-outline' }}">All</a>
+  {% for cat in categories %}
+  <a href="{{ url_for('announcements', category=cat) }}" class="filter-btn btn btn-sm {{ 'btn-primary' if active_category == cat else 'btn-outline' }}">{{ cat }}</a>
+  {% endfor %}
+</div>
+
+<div class="announcements-container">
+  {% for a in announcements %}
+  <div class="dash-card" style="margin-bottom: 1rem;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+      <div>
+        <span class="ann-priority-badge">{{ a.priority }}</span>
+        <h3 style="margin: 0.5rem 0 0.3rem;">{{ a.title }}</h3>
+        <p style="font-size:0.9rem; color: var(--text-secondary, #999);">{{ a.content }}</p>
+      </div>
+      {% if current_user and current_user.role == 'admin' %}
+      <form method="POST" action="{{ url_for('admin_delete_announcement', ann_id=a.id) }}">
+        <button type="submit" class="btn btn-sm btn-outline"><i class="fa-solid fa-trash"></i></button>
+      </form>
+      {% endif %}
+    </div>
+    <p style="font-size:0.78rem; opacity:0.7; margin-top:0.6rem;">{{ a.category }} &middot; {{ a.date_posted }} &middot; {{ a.author }}</p>
+  </div>
+  {% else %}
+  <p>No announcements in this category.</p>
+  {% endfor %}
+</div>
+{% endblock %}

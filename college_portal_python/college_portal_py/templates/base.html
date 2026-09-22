@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}College Portal{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    /* Minimal additions for the server-rendered version (flash messages, plain forms) */
+    .flash-stack { position: fixed; top: 90px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; max-width: 380px; }
+    .flash-stack .toast { animation: none; }
+    .page-wrap { padding-top: calc(var(--header-height, 80px) + 30px); padding-bottom: 60px; min-height: 70vh; }
+    .simple-table-actions form { display: inline-block; margin: 0 4px 0 0; }
+    fieldset { border: none; padding: 0; margin: 0; }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="{{ url_for('index') }}" class="nav-link" style="font-weight:700; font-size:1.15rem;">
+        <i class="fa-solid fa-graduation-cap"></i> Apex College Portal
+      </a>
+      <div class="nav-links">
+        <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+        <a href="{{ url_for('courses') }}" class="nav-link">Courses</a>
+        <a href="{{ url_for('events') }}" class="nav-link">Events</a>
+        <a href="{{ url_for('announcements') }}" class="nav-link">Announcements</a>
+      </div>
+      <div class="nav-actions">
+        {% if current_user %}
+          <a href="{{ url_for('dashboard') }}" class="btn btn-sm btn-outline">
+            <i class="fa-solid fa-gauge"></i> {{ current_user.full_name }}
+          </a>
+          <a href="{{ url_for('logout') }}" class="btn btn-sm btn-primary">Logout</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-sm btn-outline">Login</a>
+          <a href="{{ url_for('register') }}" class="btn btn-sm btn-primary">Register</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-stack">
+        {% for category, message in messages %}
+          <div class="toast toast-{{ 'danger' if category == 'error' else category }}">
+            <i class="fa-solid {{ 'fa-circle-check' if category == 'success' else 'fa-circle-exclamation' }}"></i>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="page-wrap">
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer style="text-align:center; padding: 2rem 0; color: var(--text-tertiary, #888); font-size: 0.85rem;">
+    Apex College Portal &mdash; Python/Flask edition &middot; {{ now.year }}
+  </footer>
+
+</body>
+</html>

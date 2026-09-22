@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+
+<div class="dashboard-layout" style="display:grid; grid-template-columns: 260px 1fr; gap: 2rem;">
+  <aside class="dash-sidebar" style="border-radius: var(--radius-lg, 12px);">
+    <div>
+      <div class="dash-user-card" style="text-align:center; margin-bottom:1.5rem;">
+        <img src="{{ current_user.avatar_url }}" class="dash-avatar" style="width:72px; height:72px; border-radius:50%; object-fit:cover;">
+        <h3 style="margin: 0.6rem 0 0.1rem;">{{ current_user.full_name }}</h3>
+        <p style="font-size:0.8rem; opacity:0.75;">Administrator</p>
+      </div>
+      <nav class="dash-nav-menu">
+        <a href="#metrics" class="dash-nav-item"><i class="fa-solid fa-gauge-high"></i> Metrics</a>
+        <a href="#containers" class="dash-nav-item"><i class="fa-solid fa-server"></i> Container Status</a>
+        <a href="#students" class="dash-nav-item"><i class="fa-solid fa-users"></i> Manage Students</a>
+        <a href="#announcements" class="dash-nav-item"><i class="fa-solid fa-bullhorn"></i> Announcements</a>
+      </nav>
+    </div>
+    <div class="dash-sidebar-bottom">
+      <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm" style="width:100%;">Logout</a>
+    </div>
+  </aside>
+
+  <div class="dashboard-view-container">
+
+    <section id="metrics" class="dash-tab-pane">
+      <h2>Metrics</h2>
+      <div class="dash-cards-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:2rem;">
+        <div class="dash-card"><span class="dash-card-title">Students</span><span class="dash-card-value">{{ metrics.total_students }}</span></div>
+        <div class="dash-card"><span class="dash-card-title">Faculty</span><span class="dash-card-value">{{ metrics.total_faculty }}</span></div>
+        <div class="dash-card"><span class="dash-card-title">Courses</span><span class="dash-card-value">{{ metrics.total_courses }}</span></div>
+        <div class="dash-card"><span class="dash-card-title">Events</span><span class="dash-card-value">{{ metrics.total_events }}</span></div>
+        <div class="dash-card"><span class="dash-card-title">Active Sessions</span><span class="dash-card-value">{{ metrics.active_sessions }}</span></div>
+        <div class="dash-card"><span class="dash-card-title">Uptime</span><span class="dash-card-value">{{ metrics.system_uptime }}</span></div>
+      </div>
+    </section>
+
+    <section id="containers" class="dash-tab-pane">
+      <h2>Container Telemetry</h2>
+      <p style="font-size:0.85rem; opacity:0.8; margin-bottom:1rem;">Database engine: {{ telemetry.dbEngine }} &middot; Network: {{ telemetry.network }}</p>
+      <div class="telemetry-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1rem; margin-bottom:2rem;">
+        {% for tier, data in [('frontend', telemetry.frontend), ('backend', telemetry.backend), ('database', telemetry.database)] %}
+        <div class="dash-card">
+          <h3 style="margin:0 0 0.4rem;">{{ data.name }}</h3>
+          <p style="font-size:0.82rem;">Tier: {{ data.tier }}</p>
+          <p style="font-size:0.82rem;">Status: <span class="cluster-status-badge status-running">{{ data.status }}</span></p>
+          <p style="font-size:0.82rem;">Port: {{ data.port }}</p>
+          <p style="font-size:0.82rem;">Uptime: {{ data.uptime }}</p>
+          <p style="font-size:0.82rem;">CPU {{ data.cpu_percent }}% &middot; Mem {{ data.memory_mb }} MB</p>
+          <p style="font-size:0.78rem; opacity:0.75;">{{ data.health }}</p>
+          <div style="display:flex; gap:0.5rem; margin-top:0.6rem;">
+            <form method="POST" action="{{ url_for('admin_simulate_container', tier=tier) }}">
+              <input type="hidden" name="action" value="restart">
+              <button type="submit" class="btn btn-sm btn-outline">Restart</button>
+            </form>
+            <form method="POST" action="{{ url_for('admin_simulate_container', tier=tier) }}">
+              <input type="hidden" name="action" value="health_probe">
+              <button type="submit" class="btn btn-sm btn-outline">Health Probe</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section id="students" class="dash-tab-pane">
+      <h2>Manage Students</h2>
+      <form method="POST" action="{{ url_for('admin_add_student') }}" class="dash-card" style="margin-bottom:1.5rem; max-width:600px;">
+        <div class="form-row" style="display:flex; gap:1rem;">
+          <div class="form-group" style="flex:1;">
+            <label class="form-label">Full name</label>
+            <input type="text" name="full_name" class="form-control" required>
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control">
+          </div>
+        </div>
+        <div class="form-row" style="display:flex; gap:1rem;">
+          <div class="form-group" style="flex:1;">
+            <label class="form-label">Department</label>
+            <input type="text" name="department" class="form-control">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label class="form-label">Semester</label>
+            <input type="number" name="semester" class="form-control" value="1" min="1" max="8">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label class="form-label">CGPA</label>
+            <input type="number" step="0.01" name="cgpa" class="form-control" value="8.5">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Add Student</button>
+      </form>
+
+      <div class="table-responsive" style="margin-bottom:2rem;">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Roll No.</th><th>Department</th><th>Semester</th><th>CGPA</th><th></th></tr></thead>
+          <tbody>
+            {% for s in students %}
+            <tr>
+              <td>{{ s.full_name }}</td>
+              <td>{{ s.roll_number }}</td>
+              <td>{{ s.department }}</td>
+              <td>{{ s.semester }}</td>
+              <td>{{ s.cgpa }}</td>
+              <td class="simple-table-actions">
+                <form method="POST" action="{{ url_for('admin_delete_student', student_id=s.id) }}">
+                  <button type="submit" class="btn btn-sm btn-outline"><i class="fa-solid fa-trash"></i></button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="announcements" class="dash-tab-pane">
+      <h2>Broadcast Announcement</h2>
+      <form method="POST" action="{{ url_for('admin_add_announcement') }}" class="dash-card" style="margin-bottom:1.5rem; max-width:600px;">
+        <div class="form-group">
+          <label class="form-label">Title</label>
+          <input type="text" name="title" class="form-control" required>
+        </div>
+        <div class="form-row" style="display:flex; gap:1rem;">
+          <div class="form-group" style="flex:1;">
+            <label class="form-label">Category</label>
+            <input type="text" name="category" class="form-control" placeholder="Academic">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label class="form-label">Priority</label>
+            <select name="priority" class="form-control">
+              <option>Normal</option>
+              <option>Important</option>
+              <option>Urgent</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Content</label>
+          <textarea name="content" class="form-control" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Broadcast</button>
+      </form>
+
+      <div class="dash-cards-grid" style="display:grid; gap:0.8rem;">
+        {% for a in announcements %}
+        <div class="dash-card">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <span class="ann-priority-badge">{{ a.priority }}</span>
+              <h3 style="margin:0.4rem 0 0.2rem;">{{ a.title }}</h3>
+              <p style="font-size:0.85rem; opacity:0.85;">{{ a.content }}</p>
+            </div>
+            <form method="POST" action="{{ url_for('admin_delete_announcement', ann_id=a.id) }}">
+              <button type="submit" class="btn btn-sm btn-outline"><i class="fa-solid fa-trash"></i></button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+  </div>
+</div>
+{% endblock %}

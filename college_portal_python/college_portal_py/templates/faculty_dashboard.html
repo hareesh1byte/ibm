@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Faculty Dashboard — {{ faculty.full_name }}{% endblock %}
+{% block content %}
+
+<div class="dashboard-layout" style="display:grid; grid-template-columns: 260px 1fr; gap: 2rem;">
+  <aside class="dash-sidebar" style="border-radius: var(--radius-lg, 12px);">
+    <div>
+      <div class="dash-user-card" style="text-align:center; margin-bottom:1.5rem;">
+        <img src="{{ faculty.avatar_url }}" class="dash-avatar" style="width:72px; height:72px; border-radius:50%; object-fit:cover;">
+        <h3 style="margin: 0.6rem 0 0.1rem;">{{ faculty.full_name }}</h3>
+        <p style="font-size:0.8rem; opacity:0.75;">{{ faculty.designation }}</p>
+      </div>
+      <nav class="dash-nav-menu">
+        <a href="#profile" class="dash-nav-item"><i class="fa-solid fa-id-card"></i> Profile</a>
+        <a href="#courses" class="dash-nav-item"><i class="fa-solid fa-book"></i> My Courses</a>
+        <a href="#students" class="dash-nav-item"><i class="fa-solid fa-users"></i> Students</a>
+        <a href="#assignments" class="dash-nav-item"><i class="fa-solid fa-file-lines"></i> Assignments</a>
+        <a href="#announcements" class="dash-nav-item"><i class="fa-solid fa-bullhorn"></i> Announcements</a>
+      </nav>
+    </div>
+    <div class="dash-sidebar-bottom">
+      <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm" style="width:100%;">Logout</a>
+    </div>
+  </aside>
+
+  <div class="dashboard-view-container">
+
+    <section id="profile" class="dash-tab-pane">
+      <h2>Profile</h2>
+      <div class="dash-cards-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-bottom:2rem;">
+        <div class="dash-card"><span class="dash-card-title">Department</span><span class="dash-card-value" style="font-size:1rem;">{{ faculty.department }}</span></div>
+        <div class="dash-card"><span class="dash-card-title">Employee ID</span><span class="dash-card-value" style="font-size:1rem;">{{ faculty.employee_id }}</span></div>
+        <div class="dash-card"><span class="dash-card-title">Specialization</span><span class="dash-card-value" style="font-size:0.95rem;">{{ faculty.specialization }}</span></div>
+        <div class="dash-card"><span class="dash-card-title">Cabin</span><span class="dash-card-value" style="font-size:0.95rem;">{{ faculty.cabin_location }}</span></div>
+      </div>
+    </section>
+
+    <section id="courses" class="dash-tab-pane">
+      <h2>My Courses</h2>
+      <div class="courses-grid" style="margin-bottom:2rem;">
+        {% for c in courses %}
+        <div class="course-card">
+          <img src="{{ c.thumbnail }}" style="width:100%; height:140px; object-fit:cover;">
+          <div style="padding:1rem;">
+            <span class="course-badge">{{ c.course_code }}</span>
+            <h3 style="margin:0.5rem 0 0.2rem;">{{ c.course_name }}</h3>
+            <p style="font-size:0.85rem; opacity:0.8;">{{ c.enrolled }} students enrolled</p>
+            <form method="POST" action="{{ url_for('faculty_mark_attendance', course_id=c.id) }}" style="margin-top:0.6rem; display:flex; align-items:center; gap:0.5rem;">
+              <label style="font-size:0.8rem; display:flex; align-items:center; gap:0.3rem;">
+                <input type="checkbox" name="attended" checked> Mark today's class attended
+              </label>
+              <button type="submit" class="btn btn-sm btn-outline">Log Class</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section id="students" class="dash-tab-pane">
+      <h2>Students &amp; Marks</h2>
+      <div class="table-responsive" style="margin-bottom:1.5rem;">
+        <table class="data-table">
+          <thead><tr><th>Student</th><th>Roll No.</th><th>Department</th><th>CGPA</th><th>Attendance</th></tr></thead>
+          <tbody>
+            {% for s in students %}
+            <tr>
+              <td>{{ s.full_name }}</td>
+              <td>{{ s.roll_number }}</td>
+              <td>{{ s.department }}</td>
+              <td>{{ s.cgpa }}</td>
+              <td>{{ s.overall_attendance }}%</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="assignments" class="dash-tab-pane">
+      <h2>Post an Assignment</h2>
+      <form method="POST" action="{{ url_for('faculty_add_assignment') }}" class="dash-card" style="margin-bottom:2rem; max-width:520px;">
+        <div class="form-group">
+          <label class="form-label">Course code</label>
+          <input type="text" name="course_code" class="form-control" placeholder="CS601">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Title</label>
+          <input type="text" name="title" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="form-row" style="display:flex; gap:1rem;">
+          <div class="form-group" style="flex:1;">
+            <label class="form-label">Due date</label>
+            <input type="date" name="due_date" class="form-control">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label class="form-label">Max score</label>
+            <input type="number" name="max_score" class="form-control" value="50">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Upload Assignment</button>
+      </form>
+
+      <h3>Existing Assignments</h3>
+      <div class="table-responsive" style="margin-bottom:2rem;">
+        <table class="data-table">
+          <thead><tr><th>Course</th><th>Title</th><th>Due</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for a in assignments %}
+            <tr>
+              <td>{{ a.course_code }}</td>
+              <td>{{ a.title }}</td>
+              <td>{{ a.due_date }}</td>
+              <td>{{ a.status }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="announcements" class="dash-tab-pane">
+      <h2>Recent Announcements</h2>
+      <div class="dash-cards-grid" style="display:grid; gap:0.8rem;">
+        {% for a in announcements %}
+        <div class="dash-card">
+          <span class="ann-priority-badge">{{ a.priority }}</span>
+          <h3 style="margin:0.4rem 0 0.2rem;">{{ a.title }}</h3>
+          <p style="font-size:0.85rem; opacity:0.85;">{{ a.content }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard — {{ student.full_name }}{% endblock %}
+{% block content %}
+
+<div class="dashboard-layout" style="display:grid; grid-template-columns: 260px 1fr; gap: 2rem;">
+  <aside class="dash-sidebar" style="border-radius: var(--radius-lg, 12px);">
+    <div>
+      <div class="dash-user-card" style="text-align:center; margin-bottom:1.5rem;">
+        <img src="{{ student.avatar_url }}" class="dash-avatar" style="width:72px; height:72px; border-radius:50%; object-fit:cover;">
+        <h3 style="margin: 0.6rem 0 0.1rem;">{{ student.full_name }}</h3>
+        <p style="font-size:0.8rem; opacity:0.75;">{{ student.roll_number }}</p>
+      </div>
+      <nav class="dash-nav-menu">
+        <a href="#profile" class="dash-nav-item"><i class="fa-solid fa-id-card"></i> Profile</a>
+        <a href="#attendance" class="dash-nav-item"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+        <a href="#marks" class="dash-nav-item"><i class="fa-solid fa-chart-line"></i> Marks</a>
+        <a href="#timetable" class="dash-nav-item"><i class="fa-solid fa-clock"></i> Timetable</a>
+        <a href="#assignments" class="dash-nav-item"><i class="fa-solid fa-file-lines"></i> Assignments</a>
+        <a href="#exams" class="dash-nav-item"><i class="fa-solid fa-graduation-cap"></i> Exams</a>
+      </nav>
+    </div>
+    <div class="dash-sidebar-bottom">
+      <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm" style="width:100%;">Logout</a>
+    </div>
+  </aside>
+
+  <div class="dashboard-view-container">
+
+    <section id="profile" class="dash-tab-pane">
+      <h2>Profile</h2>
+      <div class="dash-cards-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem;">
+        <div class="dash-card"><span class="dash-card-title">Department</span><span class="dash-card-value" style="font-size:1rem;">{{ student.department }}</span></div>
+        <div class="dash-card"><span class="dash-card-title">Semester</span><span class="dash-card-value">{{ student.semester }}</span></div>
+        <div class="dash-card"><span class="dash-card-title">CGPA</span><span class="dash-card-value">{{ student.cgpa }}</span></div>
+        <div class="dash-card"><span class="dash-card-title">Attendance</span><span class="dash-card-value">{{ student.overall_attendance }}%</span></div>
+        <div class="dash-card"><span class="dash-card-title">Mentor</span><span class="dash-card-value" style="font-size:1rem;">{{ student.mentor_name }}</span></div>
+        <div class="dash-card"><span class="dash-card-title">Batch</span><span class="dash-card-value" style="font-size:1rem;">{{ student.batch_year }}</span></div>
+      </div>
+    </section>
+
+    <section id="attendance" class="dash-tab-pane">
+      <h2>Attendance</h2>
+      <div class="table-responsive" style="margin-bottom:2rem;">
+        <table class="data-table">
+          <thead><tr><th>Course</th><th>Total Classes</th><th>Attended</th><th>%</th></tr></thead>
+          <tbody>
+            {% for a in attendance %}
+            <tr>
+              <td>{{ a.course_code }} — {{ a.course_name }}</td>
+              <td>{{ a.total_classes }}</td>
+              <td>{{ a.attended_classes }}</td>
+              <td>{{ a.percentage }}%</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="marks" class="dash-tab-pane">
+      <h2>Marks</h2>
+      <div class="table-responsive" style="margin-bottom:2rem;">
+        <table class="data-table">
+          <thead><tr><th>Course</th><th>Internal</th><th>Midterm</th><th>Assignment</th><th>Total</th><th>Grade</th></tr></thead>
+          <tbody>
+            {% for m in marks %}
+            <tr>
+              <td>{{ m.course_code }} — {{ m.course_name }}</td>
+              <td>{{ m.internal }}</td>
+              <td>{{ m.midterm }}</td>
+              <td>{{ m.assignment }}</td>
+              <td>{{ m.total }}</td>
+              <td>{{ m.grade }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="timetable" class="dash-tab-pane">
+      <h2>Timetable</h2>
+      <div class="table-responsive" style="margin-bottom:2rem;">
+        <table class="data-table">
+          <thead><tr><th>Day</th><th>Time</th><th>Course</th><th>Room</th><th>Instructor</th></tr></thead>
+          <tbody>
+            {% for t in timetable %}
+            <tr>
+              <td>{{ t.day }}</td>
+              <td>{{ t.time }}</td>
+              <td>{{ t.code }} — {{ t.subject }}</td>
+              <td>{{ t.room }}</td>
+              <td>{{ t.instructor }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="assignments" class="dash-tab-pane">
+      <h2>Assignments</h2>
+      <div class="dash-cards-grid" style="display:grid; gap:1rem; margin-bottom:2rem;">
+        {% for a in assignments %}
+        <div class="dash-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span class="course-badge">{{ a.course_code }}</span>
+              <h3 style="margin:0.5rem 0 0.2rem;">{{ a.title }}</h3>
+              <p style="font-size:0.85rem; color: var(--text-secondary, #999);">{{ a.description }}</p>
+              <p style="font-size:0.8rem; margin-top:0.4rem;">Due {{ a.due_date }} &middot; Max score {{ a.max_score }}{% if a.score is not none %} &middot; Scored {{ a.score }}{% endif %}</p>
+            </div>
+            <div>
+              {% if a.status == 'Submitted' %}
+                <span class="cluster-status-badge status-running">Submitted</span>
+              {% else %}
+                <form method="POST" action="{{ url_for('student_submit_assignment', assignment_id=a.id) }}">
+                  <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section id="exams" class="dash-tab-pane">
+      <h2>Exams</h2>
+      <div class="dash-cards-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem;">
+        {% for e in exams %}
+        <div class="hall-ticket-card dash-card">
+          <span class="course-badge">{{ e.course_code }}</span>
+          <h3 style="margin:0.5rem 0 0.2rem;">{{ e.subject }}</h3>
+          <p style="font-size:0.85rem;"><i class="fa-solid fa-calendar"></i> {{ e.date }} &middot; {{ e.time }}</p>
+          <p style="font-size:0.85rem;"><i class="fa-solid fa-location-dot"></i> {{ e.hall }}</p>
+          <span class="cluster-status-badge">{{ e.status }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+  </div>
+</div>
+{% endblock %}

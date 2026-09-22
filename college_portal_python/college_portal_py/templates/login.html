@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Login — Apex College Portal{% endblock %}
+{% block content %}
+<div class="auth-page-wrapper" style="padding-top: 1rem;">
+  <div class="auth-card-box">
+    <div class="auth-card-header" style="text-align:center; margin-bottom: 1.5rem;">
+      <span class="auth-brand-badge"><i class="fa-solid fa-graduation-cap"></i></span>
+      <h2 class="auth-card-title">Sign In</h2>
+      <p class="auth-card-subtitle">Access your student, faculty, or admin dashboard.</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('login') }}">
+      <div class="auth-role-segmented">
+        <label class="role-segment-btn"><input type="radio" name="role" value="student" checked style="margin-right:6px;">Student</label>
+        <label class="role-segment-btn"><input type="radio" name="role" value="faculty" style="margin-right:6px;">Faculty</label>
+        <label class="role-segment-btn"><input type="radio" name="role" value="admin" style="margin-right:6px;">Admin</label>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Username, email, roll number, or full name</label>
+        <input type="text" name="username" class="form-control" placeholder="e.g. Alex Chen, alex.chen@apex.edu, or APX-2022-CS-084" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" placeholder="Any password works in this demo" value="password123">
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width:100%; margin-top: 0.5rem;">Login</button>
+    </form>
+
+    <div style="margin-top: 1.8rem; padding: 1rem; border: 1px dashed var(--border-subtle, #444); border-radius: var(--radius-md, 8px); font-size: 0.85rem;">
+      <strong>Demo accounts</strong> (any password):
+      <ul style="margin: 0.5rem 0 0 1.1rem; padding:0;">
+        {% for s in students[:2] %}
+        <li>Student &mdash; {{ s.full_name }} <span style="opacity:0.7;">({{ s.roll_number }})</span></li>
+        {% endfor %}
+        {% for f in faculty[:1] %}
+        <li>Faculty &mdash; {{ f.full_name }} <span style="opacity:0.7;">({{ f.employee_id }})</span></li>
+        {% endfor %}
+        <li>Admin &mdash; admin@apex.edu</li>
+      </ul>
+    </div>
+
+    <p style="text-align:center; margin-top: 1.2rem; font-size: 0.9rem;">
+      No account? <a href="{{ url_for('register') }}">Register here</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

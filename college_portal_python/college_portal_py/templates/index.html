@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Apex College Portal{% endblock %}
+{% block content %}
+
+<section class="section" style="padding-top: 1rem;">
+  <div class="section-header">
+    <span class="section-tag">Welcome</span>
+    <h1 class="section-title">Apex College Portal</h1>
+    <p class="section-subtitle">A 3-tier academic management platform &mdash; now running entirely on Python (Flask).</p>
+  </div>
+  {% if not current_user %}
+  <div class="hero-ctas" style="justify-content:center; display:flex; gap: 1rem; margin-bottom: 2rem;">
+    <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">Login</a>
+    <a href="{{ url_for('register') }}" class="btn btn-outline btn-lg">Register</a>
+  </div>
+  {% endif %}
+</section>
+
+<section class="section">
+  <div class="section-header">
+    <span class="section-tag">Academics</span>
+    <h2 class="section-title">Featured Courses</h2>
+  </div>
+  <div class="courses-grid">
+    {% for c in courses %}
+    <div class="course-card">
+      <img src="{{ c.thumbnail }}" alt="{{ c.course_name }}" style="width:100%; height:160px; object-fit:cover;">
+      <div style="padding: 1.2rem;">
+        <span class="course-badge">{{ c.course_code }}</span>
+        <h3 style="margin: 0.6rem 0 0.3rem;">{{ c.course_name }}</h3>
+        <p style="font-size: 0.88rem; color: var(--text-secondary, #999);">{{ c.instructor }} &middot; {{ c.credits }} credits</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div style="text-align:center; margin-top: 1.5rem;">
+    <a href="{{ url_for('courses') }}" class="btn btn-outline">View all courses</a>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-header">
+    <span class="section-tag">Latest</span>
+    <h2 class="section-title">Announcements</h2>
+  </div>
+  <div class="announcements-container">
+    {% for a in announcements %}
+    <div class="dash-card" style="margin-bottom: 1rem;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <span class="ann-priority-badge">{{ a.priority }}</span>
+          <h3 style="margin: 0.5rem 0 0.3rem;">{{ a.title }}</h3>
+          <p style="font-size:0.9rem; color: var(--text-secondary, #999);">{{ a.content }}</p>
+        </div>
+      </div>
+      <p style="font-size:0.78rem; opacity:0.7; margin-top:0.6rem;">{{ a.category }} &middot; {{ a.date_posted }} &middot; {{ a.author }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  <div style="text-align:center; margin-top: 1rem;">
+    <a href="{{ url_for('announcements') }}" class="btn btn-outline">View all announcements</a>
+  </div>
+</section>
+
+{% endblock %}

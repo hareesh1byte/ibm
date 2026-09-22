@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Courses — Apex College Portal{% endblock %}
+{% block content %}
+<div class="section-header">
+  <span class="section-tag">Academics</span>
+  <h1 class="section-title">All Courses</h1>
+</div>
+<div class="courses-grid">
+  {% for c in courses %}
+  <div class="course-card">
+    <img src="{{ c.thumbnail }}" alt="{{ c.course_name }}" style="width:100%; height:170px; object-fit:cover;">
+    <div style="padding: 1.3rem;">
+      <span class="course-badge">{{ c.course_code }}</span>
+      <span class="course-credits-badge">{{ c.credits }} credits</span>
+      <h3 style="margin: 0.6rem 0 0.4rem;">{{ c.course_name }}</h3>
+      <p style="font-size: 0.88rem; color: var(--text-secondary, #999); margin-bottom: 0.6rem;">{{ c.description }}</p>
+      <p style="font-size: 0.85rem;"><i class="fa-solid fa-chalkboard-user"></i> {{ c.instructor }} &middot; Semester {{ c.semester }} &middot; {{ c.enrolled }} enrolled</p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

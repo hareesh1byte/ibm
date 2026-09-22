@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Events — Apex College Portal{% endblock %}
+{% block content %}
+<div class="section-header">
+  <span class="section-tag">Campus Life</span>
+  <h1 class="section-title">Upcoming Events</h1>
+</div>
+<div class="events-grid">
+  {% for e in events %}
+  <div class="event-card">
+    <img src="{{ e.image_url }}" alt="{{ e.title }}" style="width:100%; height:180px; object-fit:cover;">
+    <div style="padding: 1.3rem;">
+      <span class="course-badge">{{ e.category }}</span>
+      <h3 style="margin: 0.6rem 0 0.4rem;">{{ e.title }}</h3>
+      <p style="font-size: 0.85rem; color: var(--text-secondary, #999);"><i class="fa-solid fa-calendar"></i> {{ e.date_string }} &middot; <i class="fa-solid fa-location-dot"></i> {{ e.venue }}</p>
+      <p style="font-size: 0.88rem; margin: 0.6rem 0;">{{ e.description }}</p>
+      <div class="event-card-actions" style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:0.8rem; opacity:0.75;">{{ e.registration_count }} registered</span>
+        <form method="POST" action="{{ url_for('event_register', event_id=e.id) }}">
+          <button type="submit" class="btn btn-sm {{ 'btn-outline' if e.registered else 'btn-primary' }}">
+            {{ 'Cancel Registration' if e.registered else 'Register' }}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
